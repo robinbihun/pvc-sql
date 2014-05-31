@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "Pvc.Core": "0.0.1.7",
+    "Pvc.NuGet": "0.0.1.2",
+    "Pvc.Sql": "0.0.1.0"
+  }
+}
