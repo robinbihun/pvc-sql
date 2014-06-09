@@ -13,6 +13,6 @@
     <description>$description$</description>
     <releaseNotes></releaseNotes>
     <copyright>Copyright 2014</copyright>
-    <tags>PVC plugin scriptcs SQL MSSQL PostgreSQL</tags>
+    <tags>PVC plugin SQL MSSQL PostgreSQL</tags>
   </metadata>
 </package>
