@@ -1,20 +1,26 @@
+using MySql.Data.MySqlClient;
+using Npgsql;
 using PvcCore;
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
+using System.Data;
+using System.Data.SqlClient;
 using System.IO;
 
 namespace PvcPlugins
 {
     public class PvcSql : PvcPlugin
     {
-        private string _connectionString;
-        private string _providerName;
+        private readonly string _connectionString;
+        private readonly Provider _providerName;
 
-        public PvcSql(string connectionString, string providerName = "System.Data.SqlClient")
+        public PvcSql(string connectionString, string providerName = "MsSql")
         {
             _connectionString = connectionString;
-            _providerName = providerName;
+            if (!Enum.TryParse(providerName, true, out _providerName))
+            {
+                throw new Exception(String.Format("Provider {0} not supported.", providerName));
+            };
         }
 
         public override string[] SupportedTags
@@ -27,21 +33,17 @@ namespace PvcPlugins
 
         public override IEnumerable<PvcStream> Execute(IEnumerable<PvcStream> inputStreams)
         {
-            var provider = DbProviderFactories.GetFactory(_providerName);
-
-            using (var conn = provider.CreateConnection())
+            using (var connection = GetConnection(_providerName, _connectionString))
             {
-                conn.ConnectionString = _connectionString;
-                conn.Open();
-                using (var transaction = conn.BeginTransaction())
+                connection.Open();
+                using (var transaction = connection.BeginTransaction())
                 {
-
                     foreach (var inputStream in inputStreams)
                     {
                         Console.WriteLine("Executing Sql File: {0}", inputStream.StreamName);
                         string sql = new StreamReader(inputStream).ReadToEnd();
 
-                        using (var cmd = conn.CreateCommand())
+                        using (var cmd = connection.CreateCommand())
                         {
                             cmd.Transaction = transaction;
                             cmd.CommandText = sql;
@@ -59,10 +61,31 @@ namespace PvcPlugins
                         transaction.Rollback();
                     }
                 }
-
             }
 
             return inputStreams;
+        }
+
+        internal enum Provider
+        {
+            MsSql,
+            MySql,
+            PostgreSql,
+        }
+
+        private static IDbConnection GetConnection(Provider provider, string connectionString)
+        {
+            switch (provider)
+            {
+                case Provider.MsSql:
+                    return new SqlConnection(connectionString);
+                case Provider.MySql:
+                    return new MySqlConnection(connectionString);
+                case Provider.PostgreSql:
+                    return new NpgsqlConnection(connectionString);
+            }
+
+            throw new ApplicationException("Provider not supported.");
         }
     }
 }
