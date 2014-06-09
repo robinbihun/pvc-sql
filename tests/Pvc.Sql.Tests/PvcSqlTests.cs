@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Mime;
-using System.Runtime.Remoting.Contexts;
-using System.Text;
-using System.Threading.Tasks;
 using NUnit.Framework;
-using PvcCore;
 using PvcPlugins;
+using System;
+using System.Linq;
 
 namespace Pvc.Sql.Tests
 {
@@ -36,7 +29,7 @@ namespace Pvc.Sql.Tests
                 });
                 source.Pipe(new PvcSql(
                     connectionString: "Data Source=.;Initial Catalog=PVCSandbox;Integrated Security=True",
-                    providerName: "System.Data.SqlClient"));
+                    providerName: "MsSql"));
             });
         }
     }
